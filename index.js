@@ -1,7 +1,7 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
-const Employee = require("./lib/employee");
-const sqlFunctions = require("./lib/sqlFunctions");
+// const Employee = require("./lib/employee");
+// const sqlFunctions = require("./lib/sqlFunctions");
 
 // establish connection with mysql
 const connection = mysql.createConnection({
@@ -28,8 +28,8 @@ connection.connect(function (err) {
 });
 
 // init function to ask user what action to take
-// choices
-init = () => {
+const init = () => {
+  console.log()
   inquirer
     .prompt({
       name: "action",
@@ -37,11 +37,12 @@ init = () => {
       message: "What would you like to do?",
       choices: ["View All Employees", "EXIT"],
     })
-    .then(({action}) => {
+    .then(({ action }) => {
       switch (action) {
         case "View All Employees":
-          console.log("call view employees function");
-          init(); // place holder for testing
+          viewAllEmployees();
+          // init(); // place holder for testing
+          break;
         case "EXIT":
           exit();
       }
@@ -49,4 +50,21 @@ init = () => {
 };
 
 // function to exit the app
-exit = () => connection.end();
+const exit = () => connection.end();
+
+const viewAllEmployees = () => {
+  const queryString = `SELECT 
+  e.id, e.first_name, e.last_name, role.title, department.name, role.salary, 
+  CONCAT(m.first_name,' ',m.last_name) AS manager_name
+  FROM employee e
+  LEFT JOIN employee m ON e.manager_id = m.id
+  LEFT JOIN role ON e.role_id=role.id
+  LEFT JOIN department ON department_id=department.id;`;
+  connection.query(queryString, function (err, res) {
+    if (err) throw err;
+    // console.clear();
+    console.table(res);
+    init();
+
+  });
+};
