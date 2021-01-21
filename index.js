@@ -1,5 +1,6 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
+const printLogo = require("./lib/asciiLogo");
 // const Employee = require("./lib/employee");
 // const sqlFunctions = require("./lib/sqlFunctions");
 
@@ -24,12 +25,13 @@ connection.connect(function (err) {
     `You are connect to ${connection.config.database} as id: ${connection.threadId}`
   );
 
+  printLogo();
   init();
 });
 
 // init function to ask user what action to take
 const init = () => {
-  console.log()
+  console.log();
   inquirer
     .prompt({
       name: "action",
@@ -65,6 +67,5 @@ const viewAllEmployees = () => {
     // console.clear();
     console.table(res);
     init();
-
   });
 };
