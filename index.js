@@ -1,5 +1,7 @@
 const mysql = require ('mysql');
 const inquirer = require('inquirer');
+const Employee = require('./assets/employee')
+const Employee = require('./assets/sqlFunctions')
 
 // establish connection with mysql
 const connection = mysql.createConnection({
