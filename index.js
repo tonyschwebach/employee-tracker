@@ -23,3 +23,4 @@ connection.connect(function(err) {
   console.log(`You are connect to ${connection.config.database} as id: ${connection.threadId}`)
   connection.end();
 });
+
