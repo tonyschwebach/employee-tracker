@@ -23,3 +23,10 @@ SET role_id = 1
 WHERE id = 1;
 
 
+-- for manager options --
+SELECT 
+CONCAT(employee.id,' ',first_name,' ',last_name,' ',title) AS employee_prompt
+FROM employee
+LEFT JOIN role ON employee.role_id=role.id;
+
+
