@@ -37,7 +37,12 @@ const init = () => {
       name: "action",
       type: "list",
       message: "What would you like to do?",
-      choices: ["View All Employees", "ADD dept, role, or employee", "EXIT"],
+      choices: [
+        "View All Employees",
+        "ADD dept, role, or employee",
+        "VIEW depts, roles, or employees",
+        "EXIT",
+      ],
     })
     .then(({ action }) => {
       switch (action) {
@@ -46,6 +51,9 @@ const init = () => {
           break;
         case "ADD dept, role, or employee":
           addHRdata();
+          break;
+        case "VIEW depts, roles, or employees":
+          view();
           break;
         case "EXIT":
           exit();
@@ -151,9 +159,11 @@ const addRole = () => {
             if (err) throw err;
             connection.query(
               queryString,
-              {title: answer.title, 
+              {
+                title: answer.title,
                 salary: answer.salary,
-                department_id: result[0].id},
+                department_id: result[0].id,
+              },
               function (err, res) {
                 if (err) throw err;
                 console.log(`Role: ${answer.title} was successfully added!`);
@@ -167,5 +177,45 @@ const addRole = () => {
 };
 
 // View departments, roles, employees
+const view = () => {
+  const queryString = `SELECT * FROM ?;`;
+  let viewing = "";
+  inquirer
+    .prompt({
+      name: "action",
+      type: "list",
+      message: "What would you like to view?",
+      choices: ["View Department", "View Role", "View Employee", "BACK"],
+    })
+    .then(({ action }) => {
+      switch (action) {
+        case "View Department":
+          connection.query(`SELECT * FROM department;`, function (err, res) {
+            if (err) throw err;
+            console.table(res);
+            init();
+          });
+          break;
+
+        case "View Role":
+          connection.query(`SELECT * FROM role;`, function (err, res) {
+            if (err) throw err;
+            console.table(res);
+            init();
+          });
+          break;
+        case "View Employee":
+          connection.query(`SELECT * FROM employee;`, function (err, res) {
+            if (err) throw err;
+            console.table(res);
+            init();
+          });
+          break;
+        case "BACK":
+          init();
+          break;
+      }
+    });
+};
 
 // Update employee roles
