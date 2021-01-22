@@ -1,6 +1,7 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const printLogo = require("./lib/asciiLogo");
+const cTable = require('console.table');
 // const Employee = require("./lib/employee");
 // const sqlFunctions = require("./lib/sqlFunctions");
 
@@ -42,7 +43,7 @@ const init = () => {
         "VIEW All Employees",
         "VIEW depts, roles, or employees",
         "ADD dept, role, or employee",
-        "UPDATE employee roles",
+        "UPDATE employee",
         "EXIT",
       ],
     })
@@ -57,9 +58,8 @@ const init = () => {
         case "ADD dept, role, or employee":
           addHRdata();
           break;
-
-        case "UPDATE dept, role, or employee":
-          update();
+        case "UPDATE employee":
+          updateEmployee();
           break;
         case "EXIT":
           exit();
@@ -238,11 +238,11 @@ const addEmployee = () => {
       empQueryResult.forEach((employee) =>
         employeesArray.push(employee.employee_prompt)
       );
+      employeesArray.push("No Manager");
     }
   );
-  employeesArray.push("No Manager");
 
-  connection.query(`SELECT * FROM role`, function (err, roleQueryResult) {
+  connection.query(`SELECT * FROM role;`, function (err, roleQueryResult) {
     if (err) throw err;
     inquirer
       .prompt([
@@ -269,15 +269,8 @@ const addEmployee = () => {
         {
           name: "managerName",
           type: "list",
-          message: "Who is this employee's manager (id and name)? ",
+          message: "Who is this employee's manager (id - name - title)? ",
           choices: employeesArray,
-          // function () {
-          //   let managerChoices = [];
-          //   employeesArray.forEach((employee) =>
-          //     managerChoices.push(employee.employee_name)
-          //   );
-          //   return managerChoices;
-          // },
         },
       ])
       .then((answer) => {
@@ -317,8 +310,66 @@ const addEmployee = () => {
 };
 
 // Update employee roles
-const update = () => {
-  console.log("update");
+const updateEmployee = () => {
+  // store query of employees as potential manager choices
+  let employeesArray = [];
+  // showing more information to ensure correct employee/manager is selected
+  connection.query(
+    `SELECT 
+    CONCAT(employee.id,' - ',first_name,' ',last_name,' - ',title) AS employee_prompt
+    FROM employee
+    LEFT JOIN role ON employee.role_id=role.id;`,
+    function (err, empQueryResult) {
+      if (err) throw err;
+      empQueryResult.forEach((employee) =>
+        employeesArray.push(employee.employee_prompt)
+      );
+
+     
+      // store query of employees as potential manager choices
+      let rolesArray = [];
+      connection.query(`SELECT * FROM role;`, function (err, roleQueryResult) {
+        if (err) throw err;
+        roleQueryResult.forEach((role) => rolesArray.push(role.title));
+      });
+
+      inquirer
+        .prompt([
+          {
+            name: "updatedEmployee",
+            type: "list",
+            message: "Which employee would you like to update? ",
+            choices: employeesArray,
+          },
+          {
+            name: "firstName",
+            type: "input",
+            message: "Employee first name: ",
+          },
+          {
+            name: "lastName",
+            type: "input",
+            message: "Employee last name: ",
+          },
+          {
+            name: "roleTitle",
+            type: "list",
+            message: "What is this employee's role? ",
+            choices: rolesArray,
+          },
+          //  employeesArray.push("No Manager"); employeesArray.push("No Manager");
+          {
+            name: "managerName",
+            type: "list",
+            message: "Who is this employee's manager (id - name - title)? ",
+            choices: employeesArray,
+          },
+        ])
+        .then((answer) => {
+          console.log(answer);
+        });
+    }
+  );
 };
 
 // function to exit the app
