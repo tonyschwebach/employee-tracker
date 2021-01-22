@@ -25,8 +25,13 @@ WHERE id = 1;
 
 -- for manager options --
 SELECT 
-CONCAT(employee.id,' ',first_name,' ',last_name,' ',title) AS employee_prompt
+CONCAT(employee.id,' - ',first_name,' ',last_name,' - ',title) AS employee_prompt
 FROM employee
 LEFT JOIN role ON employee.role_id=role.id;
 
+
+-- delete --
+DELETE FROM employee where id = 1;
+DELETE FROM department where id = 1;
+DELETE FROM role where id = 1;
 

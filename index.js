@@ -2,8 +2,7 @@ const mysql = require("mysql");
 const inquirer = require("inquirer");
 const printLogo = require("./lib/asciiLogo");
 const cTable = require('console.table');
-// const Employee = require("./lib/employee");
-// const sqlFunctions = require("./lib/sqlFunctions");
+
 
 // establish connection with mysql
 const connection = mysql.createConnection({
@@ -325,7 +324,6 @@ const updateEmployee = () => {
         employeesArray.push(employee.employee_prompt)
       );
 
-     
       // store query of employees as potential manager choices
       let rolesArray = [];
       connection.query(`SELECT * FROM role;`, function (err, roleQueryResult) {
@@ -362,11 +360,58 @@ const updateEmployee = () => {
             name: "managerName",
             type: "list",
             message: "Who is this employee's manager (id - name - title)? ",
-            choices: employeesArray,
+            choices: function () {
+              employeesArray.push("No Manager");
+              return employeesArray;
+            },
           },
         ])
         .then((answer) => {
-          console.log(answer);
+          let employeeID = parseInt(answer.updatedEmployee);
+          for (let i = 0; i < employeesArray.length; i++) {
+            // if (answer.updateEmployee === updatedEmployee[i]) {
+            //   employeeID = i;
+            //   break;
+            // }
+          }
+          let roleID = 0;
+          for (let i = 0; i < rolesArray.length; i++) {
+            if (answer.roleTitle === rolesArray[i].title) {
+              roleID = i + 1;
+              break;
+            }
+          }
+          let managerID = null;
+          if (answer.managerName === "No Manager") {
+            managerID = null;
+          } else {
+            managerID = parseInt(answer.managerName);
+          }
+          connection.query(
+            `SELECT * FROM role WHERE title = ?`,
+            [answer.roleTitle],
+            function (err, result) {
+              if (err) throw err;
+
+              connection.query(
+                `UPDATE employee SET ? WHERE id = ?;`,
+                [
+                  {
+                    first_name: answer.firstName,
+                    last_name: answer.lastName,
+                    role_id: result[0].id,
+                    manager_id: managerID,
+                  },
+                  employeeID,
+                ],
+                function (err, res) {
+                  if (err) throw err;
+                  console.log("Employee Updated");
+                  init();
+                }
+              );
+            }
+          );
         });
     }
   );
