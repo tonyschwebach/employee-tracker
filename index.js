@@ -24,7 +24,7 @@ connection.connect(function (err) {
   console.log(
     `You are connect to ${connection.config.database} as id: ${connection.threadId}`
   );
-
+  console.clear();
   printLogo();
   init();
 });
@@ -85,10 +85,10 @@ const addHRdata = () => {
     .then(({ action }) => {
       switch (action) {
         case "Add Department":
-          console.log("+dept");
+          addDept();
           break;
         case "Add Role":
-          console.log("+role");
+          addRole();
           break;
         case "Add Employee":
           console.log("+employee");
@@ -97,6 +97,73 @@ const addHRdata = () => {
           init();
       }
     });
+};
+
+const addDept = () => {
+  const queryString = `INSERT INTO department (name) VALUES (?)`;
+  inquirer
+    .prompt({
+      name: "deptName",
+      type: "input",
+      message: "What is the NAME of the department you would like to add?",
+    })
+    .then(({ deptName }) => {
+      connection.query(queryString, [deptName], function (err, res) {
+        if (err) throw err;
+        console.log(`Dept: ${deptName} was successfully added!`);
+        init();
+      });
+    });
+};
+
+const addRole = () => {
+  const queryString = `INSERT INTO role SET ?`;
+  connection.query(`SELECT * FROM department`, function (err, deptQueryResult) {
+    if (err) throw err;
+    inquirer
+      .prompt([
+        {
+          name: "title",
+          type: "input",
+          message: "What is the TITLE of the role you would like to add?",
+        },
+        {
+          name: "salary",
+          type: "number",
+          message: "What is the SALARY of the role you are adding?",
+        },
+        {
+          name: "departName",
+          type: "list",
+          message: "What is DEPARTMENT for which the role belongs?",
+          choices: function () {
+            let deptArray = [];
+            deptQueryResult.forEach((dept) => deptArray.push(dept.name));
+            return deptArray;
+          },
+        },
+      ])
+      .then((answer) => {
+        connection.query(
+          `SELECT * FROM department WHERE name = ?`,
+          [answer.departName],
+          function (err, result) {
+            if (err) throw err;
+            connection.query(
+              queryString,
+              {title: answer.title, 
+                salary: answer.salary,
+                department_id: result[0].id},
+              function (err, res) {
+                if (err) throw err;
+                console.log(`Role: ${answer.title} was successfully added!`);
+                init();
+              }
+            );
+          }
+        );
+      });
+  });
 };
 
 // View departments, roles, employees
