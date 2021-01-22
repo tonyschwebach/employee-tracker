@@ -37,13 +37,15 @@ const init = () => {
       name: "action",
       type: "list",
       message: "What would you like to do?",
-      choices: ["View All Employees", "EXIT"],
+      choices: ["View All Employees", "ADD dept, role, or employee", "EXIT"],
     })
     .then(({ action }) => {
       switch (action) {
         case "View All Employees":
           viewAllEmployees();
-          // init(); // place holder for testing
+          break;
+        case "ADD dept, role, or employee":
+          addHRdata();
           break;
         case "EXIT":
           exit();
@@ -54,9 +56,10 @@ const init = () => {
 // function to exit the app
 const exit = () => connection.end();
 
+// view all employees
 const viewAllEmployees = () => {
   const queryString = `SELECT 
-  e.id, e.first_name, e.last_name, role.title, department.name, role.salary, 
+  e.id, e.first_name, e.last_name, role.title, department.name AS department, role.salary, 
   CONCAT(m.first_name,' ',m.last_name) AS manager_name
   FROM employee e
   LEFT JOIN employee m ON e.manager_id = m.id
@@ -69,3 +72,33 @@ const viewAllEmployees = () => {
     init();
   });
 };
+
+// Add departments, roles, employees
+const addHRdata = () => {
+  inquirer
+    .prompt({
+      name: "action",
+      type: "list",
+      message: "What would you like to add?",
+      choices: ["Add Department", "Add Role", "Add Employee", "BACK"],
+    })
+    .then(({ action }) => {
+      switch (action) {
+        case "Add Department":
+          console.log("+dept");
+          break;
+        case "Add Role":
+          console.log("+role");
+          break;
+        case "Add Employee":
+          console.log("+employee");
+          break;
+        case "BACK":
+          init();
+      }
+    });
+};
+
+// View departments, roles, employees
+
+// Update employee roles

@@ -6,7 +6,7 @@ SELECT * FROM department;
 SELECT * FROM role;
 
 -- show all employee info --
-
+SELECT * FROM employee;
 
 -- show employee info joined --
 SELECT 
@@ -21,3 +21,5 @@ LEFT JOIN department ON department_id=department.id;
 UPDATE employee
 SET role_id = 1
 WHERE id = 1;
+
+
